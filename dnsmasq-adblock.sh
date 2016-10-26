@@ -1,8 +1,19 @@
 #!/bin/bash
 # This if for Asuswrt-merlin
 
-# Add the following configs to /jffs/configs/dnsmasq.conf.add
+# 1. Add the following configs to /jffs/configs/dnsmasq.conf.add
+#
 # addn-hosts=/tmp/hosts.dnsmasq
+#
+# 2. Create the file /jffs/scripts/init-start with the following content:
+# #!/bin/sh
+# touch/tmp/hosts.dnsmasq
+#
+# 3. Grant exec permission: chmod a+x /jffs/scripts/*
+#
+# 4. Add the following line to /jffs/scripts/firewall-start :
+# wget --no-check-certificate -qO- 'https://raw.githubusercontent.com/kevinxw/asuswrt-merlin-bootstrap/master/dnsmasq-adblock.sh' | bash
+
 
 declare -a DOMAIN_BLACKLIST=(
 'https://pgl.yoyo.org/as/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext'
@@ -30,7 +41,7 @@ HOSTS_FILE_CACHE_DIR="${HOSTS_FILE}.cache"
 
 download_blacklist() {
     logger "Downloading $1 to $2"
-    wget -qO- "$1" | grep -Ev '^[ \t]*#' | grep -oE '[ \t\r\n\v\f]*([a-zA-Z0-9]+[-a-zA-Z0-9]*\.)+[a-zA-Z]{2,}[ \t\r\n\v\f]*' > $2
+    wget --no-check-certificate -qO- "$1" | grep -Ev '^[ \t]*#' | grep -oE '[ \t\r\n\v\f]*([a-zA-Z0-9]+[-a-zA-Z0-9]*\.)+[a-zA-Z]{2,}[ \t\r\n\v\f]*' > $2
 }
 
 download_blacklist_all() {
@@ -43,7 +54,7 @@ download_blacklist_all() {
 
 download_adblock_list() {
     logger "Downloading $1 to $2"
-    wget -qO- "$1" | grep -Ev '^[ \t]*#' > "$2.tmp"
+    wget --no-check-certificate -qO- "$1" | grep -Ev '^[ \t]*#' > "$2.tmp"
     cat "$2.tmp" | grep -oE '^\|\|[A-Za-z0-9\.-]+\^$' | awk '{print substr($0, 3, length($0)-3)}' > "$2"
     # for exception (whitelist)
     cat "$2.tmp" | grep -oE '^@@\|\|[A-Za-z0-9\.-]+\^$' | awk '{print substr($0, 5, length($0)-5)}' > "$2.exception"
