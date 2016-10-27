@@ -75,7 +75,7 @@ generate_host() {
     local HOSTS_DST="$2"
     logger "Generating ${HOSTS_DST} file.."
     find "${HOSTS_DIR}" -name *.hosts -type f -exec awk '!a[$0]++' {} + > ${HOSTS_DST}
-    sed -i 's/^/0.0.0.0/' ${HOSTS_DST}
+    sed -i 's/^/0.0.0.0 /' ${HOSTS_DST}
 }
 
 main() {
