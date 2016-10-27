@@ -12,7 +12,7 @@
 # 3. Grant exec permission: chmod a+x /jffs/scripts/*
 #
 # 4. Add the following line to /jffs/scripts/firewall-start :
-# wget --no-check-certificate -qO- 'https://raw.githubusercontent.com/kevinxw/asuswrt-merlin-bootstrap/master/dnsmasq-adblock.sh' | bash
+# nice wget --no-check-certificate -qO- 'https://raw.githubusercontent.com/kevinxw/asuswrt-merlin-bootstrap/master/dnsmasq-adblock.sh' | nice bash
 
 
 declare -a DOMAIN_BLACKLIST=(
@@ -75,10 +75,14 @@ generate_host() {
     local HOSTS_DST="$2"
     logger "Generating ${HOSTS_DST} file.."
     find "${HOSTS_DIR}" -name *.hosts -type f -exec awk '!a[$0]++' {} + > ${HOSTS_DST}
-    sed -i 's/^/0.0.0.0 /' ${HOSTS_DST}
+    sed -i '' 's/^/0.0.0.0 /' ${HOSTS_DST}
 }
 
 main() {
+    if [ ! -z "$1" ]; then
+        HOSTS_FILE="$1"
+    fi
+
     rm -f ${HOSTS_FILE}
     rm -rf ${HOSTS_FILE_CACHE_DIR}
     mkdir -p ${HOSTS_FILE_CACHE_DIR}
@@ -94,8 +98,8 @@ main() {
 }
 
 # for debugging only, Asuswrt-merlin has this function by default
-#logger() {
-#    echo $1
-#}
+logger() {
+    echo $1
+}
 
 main "$@"
